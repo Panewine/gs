@@ -195,18 +195,18 @@ legend { color: #efc47d; padding-right: .5rem; }
 label { display: flex; align-items: center; gap: .35rem; white-space: nowrap; }
 .class-choice select { min-width: 9rem; padding: .3rem .4rem; color: white; background: #292e33; border: 1px solid #846943; border-radius: 5px; }
 .level-range input { width: 5rem; padding: .3rem .4rem; color: white; background: #292e33; border: 1px solid #846943; border-radius: 5px; }
-.category-picker { position: relative; align-self: end; }
+.category-picker { align-self: end; }
 .category-trigger { display: flex; align-items: center; gap: .65rem; min-height: 2.2rem; padding: .35rem .7rem; border: 1px solid #846943; border-radius: 6px; background: #292e33; color: #efc47d; cursor: pointer; list-style: none; }
 .category-trigger::-webkit-details-marker { display: none; }
 .category-trigger::after { content: '▾'; margin-left: .15rem; }
 .category-picker details[open] .category-trigger { background: #3f3527; }
 .selected-count { display: inline-grid; place-items: center; min-width: 1.4rem; height: 1.4rem; padding: 0 .2rem; border-radius: 1rem; color: #171b20; background: #efc47d; font-size: .8rem; }
-.category-menu { position: absolute; top: calc(100% + .5rem); right: 0; z-index: 10; width: min(740px, calc(100vw - 3rem)); max-height: min(65vh, 540px); overflow-y: auto; padding: .9rem; border: 1px solid #846943; border-radius: 10px; background: #171b20; box-shadow: 0 16px 32px #0009; }
+.category-menu { position: absolute; top: calc(100% + .5rem); left: 0; z-index: 10; width: min(740px, 100%); max-height: min(65vh, 540px); overflow-y: auto; padding: .9rem; border: 1px solid #846943; border-radius: 10px; background: #171b20; box-shadow: 0 16px 32px #0009; }
 .category-menu p { color: #bfb7a9; margin-bottom: .7rem; }
 .category-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
 .done-button { display: block; margin: .8rem 0 0 auto; padding: .35rem .8rem; border: 1px solid #846943; border-radius: 5px; color: #efc47d; }
 .done-button:hover { background: #3f3527; }
 .range-error { color: #f1a081; }
 .arts-page :deep(.browser) { flex: 1; min-height: 0; height: auto; padding: 0; }
-@media (max-width: 760px) { .category-menu { right: auto; left: 0; } .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>
