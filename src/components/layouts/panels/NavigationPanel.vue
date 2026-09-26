@@ -3,34 +3,30 @@ import BaseLink from '@/components/BaseLink.vue'
 </script>
 
 <template>
-  <div class="fixed top-0 z-20 flex items-start">
-    <img src="/images/t1.png" style="margin-left: -512px" class="pointer-events-none" />
-    <img src="/images/t1.png" class="pointer-events-none" />
-    <img src="/images/t2.png" class="pointer-events-none" />
-    <img src="/images/t3.png" class="pointer-events-none" />
-    <img src="/images/t4.png" class="pointer-events-none" />
+  <div class="fixed top-0 left-0 z-20 flex items-start">
+    <img src="/images/t1.png" style="margin-left: -512px" class="nav-art pointer-events-none" />
+    <img src="/images/t1.png" class="nav-art pointer-events-none" />
+    <img src="/images/t2.png" class="nav-art pointer-events-none" />
+    <img src="/images/t3.png" class="nav-art pointer-events-none" />
+    <img src="/images/t4.png" class="nav-art pointer-events-none" />
     <img
       src="/images/t1.png"
       style="margin-right: -512px; height: 61px"
-      class="pointer-events-none"
+      class="nav-art pointer-events-none"
     />
 
-    <!-- Основное меню -->
-    <div class="absolute w-lg">
-      <BaseLink title="Главная" link="/" class="absolute left-10 top-2 z-1" />
-      <BaseLink title="Крафт" link="/craft" class="absolute top-2 z-1 left-56" />
-      <BaseLink title="Боссы" link="/boss" class="absolute right-12 top-2 z-1" />
-    </div>
-
-    <!-- Дополнительное меню -->
-    <div class="absolute ml-128 w-lg">
-      <BaseLink title="Квесты" link="/quest" class="absolute left-12 top-2 z-1" />
-      <BaseLink title="О проекте" link="/about" class="absolute -right-4 top-2 z-1" />
+    <!-- Ссылки располагаются в ячейках текстуры меню. -->
+    <div class="nav-links absolute z-10">
+      <BaseLink title="Главная" link="/" />
+      <BaseLink title="Боссы" link="/boss" />
+      <BaseLink title="Квесты" link="/quest" />
+      <BaseLink title="Гайды" link="/guides" />
+      <BaseLink title="Арты" link="/arts" />
     </div>
 
     <!-- Информационная панель -->
-    <div class="absolute ml-256 w-lg">
-      <div class="absolute left-20 top-2 text-orange font-extrabold text-xl">Version 1.5b3+</div>
+    <div class="version-panel absolute ml-256 w-lg">
+      <div class="absolute left-20 top-2 text-orange font-extrabold text-xl">Version 1.5.5fix9</div>
       <a
         href="https://discord.gg/3rhvtTWU"
         target="_blank"
@@ -41,3 +37,25 @@ import BaseLink from '@/components/BaseLink.vue'
     </div>
   </div>
 </template>
+
+<style scoped>
+.nav-art, .version-panel {
+  transform: translateX(372px);
+}
+.nav-links {
+  left: 30px;
+  top: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 170px);
+  width: 1020px;
+  height: 58px;
+  align-items: start;
+}
+.nav-links :deep(a) {
+  display: flex;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+</style>

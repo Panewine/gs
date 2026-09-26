@@ -94,7 +94,7 @@ onMounted(() => {
         <span>
           Интерактивный редактор персонажа, дерево крафта и библиотека оружия для твоей любимой
           карты. <br />
-          <span class="warcraft-title-underline">Актуально для версии 1.5b</span>
+          <span class="warcraft-title-underline">Каталог крафта и гайды: версия 1.5.5fix9</span>
         </span>
       </div>
 

@@ -36,17 +36,18 @@ watch(
   () => route.path,
   () => {
     tooltipActions.hide()
+    if (!['craft', 'guides', 'arts'].includes(route.name)) store.getItems()
   }
 )
 
 const modal = ref(null)
 onMounted(() => {
-  if (width.value < 1600) {
+  if (width.value < 900 && !['craft', 'guides', 'arts'].includes(route.name)) {
     setTimeout(() => {
       modal.value.open()
     }, 0)
   }
-  store.getItems()
+  if (!['craft', 'guides', 'arts'].includes(route.name)) store.getItems()
 })
 </script>
 

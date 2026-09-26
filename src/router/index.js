@@ -44,7 +44,17 @@ const router = createRouter({
     {
       path: '/craft',
       name: 'craft',
-      component: () => import('@/views/ItemsTestPage.vue'),
+      component: () => import('@/views/CatalogPage.vue'),
+    },
+    {
+      path: '/guides',
+      name: 'guides',
+      component: () => import('@/views/GuidesPage.vue'),
+    },
+    {
+      path: '/arts',
+      name: 'arts',
+      component: () => import('@/views/ArtsPage.vue'),
     },
   ],
 })
