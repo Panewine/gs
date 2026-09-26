@@ -63,6 +63,7 @@ const bossIcons = {
   18: JaegerIcon,
   19: TankIcon,
 }
+const noseSlotBosses = new Set(['Потный рабовладелец', 'Экскаватор КУС', 'Бомбс и Аккуратерс', 'Хазул', 'Дрессировщик'])
 
 const currentBossItems = computed(() => {
   return items.value.filter((item) => currentBoss.value.items.some((i) => i.name === item.name))
@@ -155,9 +156,9 @@ onMounted(() => {
             :key="boss.id"
             :to="`/boss?name=${boss.name}`"
             class="block text-lg opacity-75 lg:text-xl text-white hover:text-active transition-all duration-200 hover:translate-x-1 py-1"
-            :class="[{ 'underline font-semibold opacity-100': boss.id === currentBoss?.id }]"
+            :class="[{ 'underline font-semibold opacity-100': boss.id === currentBoss?.id, 'boss-with-nose': noseSlotBosses.has(boss.name) }]"
           >
-            {{ boss.name }}
+            {{ boss.name }}<span v-if="noseSlotBosses.has(boss.name)" class="nose-slot">+ слот носа</span>
           </router-link>
         </div>
       </div>
@@ -277,6 +278,8 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.boss-with-nose { font-size: 1.125rem; }
+.nose-slot { display: inline-block; margin-left: .2rem; color: #efc47d; font-size: .6rem; white-space: nowrap; }
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.15s ease;

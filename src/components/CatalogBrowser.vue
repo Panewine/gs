@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { bossFor, catalog, catalogKindLabel, catalogLabel, fallbackIcon, iconFor, itemById, normalizeName } from '@/common/catalog'
@@ -21,6 +21,9 @@ const emit = defineEmits(['select'])
 const route = useRoute()
 const router = useRouter()
 const query = ref('')
+const hoveredUsed = ref(null)
+const previewStyle = ref({})
+let hidePreviewTimer
 const selectedClass = ref(props.fixedClass || String(route.query.class || ''))
 const selected = ref(itemById.get(String(props.selectedItemId || route.query.item || '')) || null)
 const selectedId = computed(() => selected.value?.id)
@@ -58,10 +61,38 @@ watch(() => props.items, (items) => {
 })
 
 function choose(item) {
+  hoveredUsed.value = null
   selected.value = item
   emit('select', item)
   if (!props.fixedClass) router.replace({ query: { ...route.query, item: item.id } })
 }
+
+function showUsedPreview(item, event) {
+  clearTimeout(hidePreviewTimer)
+  const rect = event.currentTarget.getBoundingClientRect()
+  const width = Math.min(340, window.innerWidth - 24)
+  const below = window.innerHeight - rect.bottom
+  const showAbove = below < 260 && rect.top > below
+
+  previewStyle.value = {
+    left: `${Math.max(12, Math.min(rect.left, window.innerWidth - width - 12))}px`,
+    top: `${showAbove ? rect.top - 8 : rect.bottom + 8}px`,
+    width: `${width}px`,
+    transform: showAbove ? 'translateY(-100%)' : 'none',
+  }
+  hoveredUsed.value = item
+}
+
+function hideUsedPreview() {
+  clearTimeout(hidePreviewTimer)
+  hidePreviewTimer = setTimeout(() => { hoveredUsed.value = null }, 120)
+}
+
+function keepUsedPreview() {
+  clearTimeout(hidePreviewTimer)
+}
+
+onBeforeUnmount(() => clearTimeout(hidePreviewTimer))
 
 function changeClass() {
   selected.value = null
@@ -108,9 +139,20 @@ function changeClass() {
       <h3>Описание</h3><p class="raw">{{ selected.description || 'В CSV не указано.' }}</p>
       <h3>Рецепт и источник</h3><CatalogRecipe :key="selected.id" :item="selected" @select="choose" />
       <h3 v-if="usedIn.length">Используется в</h3>
-      <div class="used"><button v-for="item in usedIn" :key="item.id" @click="choose(item)">{{ item.name }}</button></div>
+      <div class="used">
+        <button v-for="item in usedIn" :key="item.id" type="button" :aria-label="item.name" :aria-describedby="hoveredUsed?.id === item.id ? 'used-preview' : undefined" @mouseenter="showUsedPreview(item, $event)" @mouseleave="hideUsedPreview" @focus="showUsedPreview(item, $event)" @blur="hideUsedPreview" @click="choose(item)">
+          <img :src="iconFor(item)" alt="" loading="lazy" @error="$event.target.src = fallbackIcon" />
+        </button>
+      </div>
     </article>
     <div class="details empty" v-else>Выберите предмет, чтобы увидеть описание и дерево крафта.</div>
+    <Teleport to="body">
+      <div v-if="hoveredUsed" id="used-preview" class="used-preview" role="tooltip" :style="previewStyle" @mouseenter="keepUsedPreview" @mouseleave="hideUsedPreview">
+        <strong>{{ catalogLabel(hoveredUsed) }}</strong>
+        <span class="preview-level">{{ hoveredUsed.level == null ? 'Уровень не указан' : `Уровень ${hoveredUsed.level}` }}</span>
+        <p>{{ hoveredUsed.description || 'Описание не указано.' }}</p>
+      </div>
+    </Teleport>
   </section>
 </template>
 
@@ -137,6 +179,12 @@ input { flex: 1; }
 .details header h2 { margin: 0; }
 .raw { white-space: pre-wrap; line-height: 1.5; }
 .used { display: flex; flex-wrap: wrap; gap: .5rem; }
-.used button { color: #efc47d; border: 1px solid #725633; padding: .3rem .5rem; border-radius: 5px; }
+.used button { border: 1px solid #725633; border-radius: 5px; padding: .15rem; }
+.used button:hover, .used button:focus-visible { border-color: #efc47d; background: #3f3527; }
+.used img { width: 44px; height: 44px; object-fit: cover; }
+.used-preview { position: fixed; z-index: 1000; max-height: 70vh; overflow-y: auto; padding: .75rem; border: 1px solid #a17b43; border-radius: 8px; background: #171b20; box-shadow: 0 12px 28px #000b; color: #f6eee1; }
+.used-preview strong { display: block; color: #efc47d; }
+.preview-level { color: #bfb7a9; font-size: .8rem; }
+.used-preview p { white-space: pre-wrap; line-height: 1.4; margin-top: .5rem; }
 .empty { color: #bfb7a9; }
 </style>
