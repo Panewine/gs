@@ -130,7 +130,7 @@ const artGroups = computed(() => {
   const validRange = Number.isInteger(from) && Number.isInteger(to) && from >= 1 && to <= 150 && from <= to
   const rangeActive = from !== 1 || to < 150
   const withinLimits = (item) => fitsClass(item, selectedClass.value) &&
-    (!rangeActive || (validRange && (item.level == null ? item.kind === 'food' || item.id.startsWith('pops-') || item.id.startsWith('bombs-') : item.level >= from && item.level <= to)))
+    (!rangeActive || (validRange && (item.level == null ? item.kind === 'food' || item.id.startsWith('pops-') || !!bossFor(item) : item.level >= from && item.level <= to)))
   const filterGroup = (group, parentSelected = false) => {
     const selected = parentSelected || !!categories[group.id]
     const items = selected ? group.items.filter(withinLimits) : []
