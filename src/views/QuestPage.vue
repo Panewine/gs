@@ -8,11 +8,10 @@ const files = import.meta.glob('../data/quests/[0-9][0-9]_*.md', { query: '?raw'
 const quests = Object.entries(files)
   .map(([path, source]) => {
     const number = Number(path.match(/\/(\d\d)_/)?.[1])
-    const body = source.split(/^---\s*$/m)[0]
+    const body = source.trim()
     const title = body.match(/^# Квест \d+: (.+)$/m)?.[1].trim() || path.split('/').pop()
-    const steps = [...body.matchAll(/^- (.+)$/gm)].map((match) => match[1].trim())
 
-    return { number, title, steps }
+    return { number, title, body, html: markdown.render(body.replace(/^# .+\r?\n/, '').trim()) }
   })
   .sort((a, b) => a.number - b.number)
 
@@ -20,19 +19,15 @@ const search = ref('')
 const selectedNumber = ref(1)
 const selectedQuest = computed(() => quests.find((quest) => quest.number === selectedNumber.value))
 const visibleQuests = computed(() => quests.filter((quest) =>
-  `${quest.title} ${quest.steps.join(' ')}`.toLocaleLowerCase('ru').includes(search.value.toLocaleLowerCase('ru').trim())
+  quest.body.toLocaleLowerCase('ru').includes(search.value.toLocaleLowerCase('ru').trim())
 ))
-
-function renderStep(text) {
-  return markdown.renderInline(text)
-}
 </script>
 
 <template>
   <main class="quests-page">
     <header class="page-head">
       <h1>Квесты</h1>
-      <p>Последовательность из {{ quests.length }} заданий Goblin Survival.</p>
+      <p>Гайды по {{ quests.length }} заданиям Goblin Survival. Основаны на <a href="https://goblin-workshops.ru/forum/viewtopic.php?f=8&t=76" target="_blank" rel="noopener noreferrer">старом описании квестовой линии</a>; детали версии 1.5.5fix9 могут отличаться.</p>
     </header>
 
     <div class="quest-layout">
@@ -58,9 +53,7 @@ function renderStep(text) {
       <section v-if="selectedQuest" class="panel quest-detail">
         <p class="eyebrow">Квест {{ selectedQuest.number }} из {{ quests.length }}</p>
         <h2>{{ selectedQuest.title }}</h2>
-        <ol class="steps">
-          <li v-for="(step, index) in selectedQuest.steps" :key="index" v-html="renderStep(step)" />
-        </ol>
+        <div class="guide-content" v-html="selectedQuest.html" />
         <div class="quest-nav">
           <button type="button" :disabled="selectedNumber === 1" @click="selectedNumber--">← Предыдущий</button>
           <button type="button" :disabled="selectedNumber === quests.length" @click="selectedNumber++">Следующий →</button>
@@ -75,6 +68,7 @@ function renderStep(text) {
 .quests-page { color: #f6eee1; width: 100%; height: calc(100vh - 60px); overflow-y: auto; padding: 1rem 1.5rem 3rem; }
 .page-head h1 { color: #efc47d; font-size: 1.8rem; }
 .page-head p, .count { color: #bfb7a9; }
+.page-head a { color: #efc47d; text-decoration: underline; }
 .quest-layout { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); gap: 1rem; margin-top: 1rem; align-items: start; }
 .panel { background: #171b20ed; border: 1px solid #725633; border-radius: 10px; padding: 1rem; }
 .quest-list { display: flex; flex-direction: column; max-height: min(720px, calc(100vh - 170px)); }
@@ -89,9 +83,20 @@ function renderStep(text) {
 .quest-detail { min-height: 380px; }
 .eyebrow { font-size: .9rem; }
 .quest-detail h2 { color: #efc47d; font-size: 1.3rem; margin: .3rem 0 1rem; }
-.steps { list-style: decimal; padding-left: 1.5rem; line-height: 1.55; }
-.steps li { margin-bottom: .75rem; padding-left: .25rem; }
-.steps li::marker { color: #efc47d; }
+.guide-content { line-height: 1.6; }
+.guide-content :deep(h3) { color: #efc47d; font-size: 1.05rem; margin: 1.25rem 0 .45rem; }
+.guide-content :deep(h3:first-child) { margin-top: 0; }
+.guide-content :deep(p) { margin: .35rem 0 .75rem; }
+.guide-content :deep(ol), .guide-content :deep(ul) { padding-left: 1.5rem; margin: .35rem 0 .9rem; }
+.guide-content :deep(ol) { list-style: decimal; }
+.guide-content :deep(ul) { list-style: disc; }
+.guide-content :deep(li) { margin: .35rem 0; }
+.guide-content :deep(li::marker) { color: #efc47d; }
+.guide-content :deep(strong) { color: #efc47d; }
+.guide-content :deep(code) { color: #efc47d; background: #292e33; padding: 0 .2rem; border-radius: 3px; }
+.guide-content :deep(table) { width: 100%; border-collapse: collapse; margin: .75rem 0 1rem; }
+.guide-content :deep(th), .guide-content :deep(td) { padding: .55rem; border: 1px solid #725633; text-align: left; vertical-align: top; }
+.guide-content :deep(th) { color: #efc47d; background: #292e33; }
 .quest-nav { display: flex; justify-content: space-between; gap: .5rem; margin-top: 2rem; }
 .quest-nav button { border: 1px solid #846943; border-radius: 5px; color: #efc47d; padding: .35rem .65rem; }
 .quest-nav button:hover:not(:disabled) { background: #66502f; }
