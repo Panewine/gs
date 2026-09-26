@@ -6,7 +6,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix",
-    "deploy": "npm run build && git add dist -f && git commit -m \"Deploy to production\" && git subtree push --prefix dist origin gh-pages"
+    "deploy": "node scripts/deploy.mjs"
   },
   "dependencies": {
     "@vueuse/core": "^13.4.0",
