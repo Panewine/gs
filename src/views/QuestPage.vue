@@ -1,208 +1,114 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import MarkdownIt from 'markdown-it'
+import { computed, ref } from 'vue'
 
-import BigMap from '@/components/BigMap.vue'
-import { store } from '@/components/composables/store.js'
-import TheModal from '@/components/TheModal.vue'
+const markdown = new MarkdownIt({ html: false })
+const files = import.meta.glob('../data/quests/[0-9][0-9]_*.md', { query: '?raw', import: 'default', eager: true })
 
-onMounted(async () => await store.setQuests())
+const quests = Object.entries(files)
+  .filter(([path]) => !path.endsWith('00_Индекс_квестов.md'))
+  .map(([path, source]) => {
+    const number = Number(path.match(/\/(\d\d)_/)?.[1])
+    const body = source.split(/^---\s*$/m)[0]
+    const title = body.match(/^# Квест \d+: (.+)$/m)?.[1].trim() || path.split('/').pop()
+    const steps = [...body.matchAll(/^- (.+)$/gm)].map((match) => match[1].trim())
 
-const items = computed(() => store.entities.items)
+    return { number, title, steps }
+  })
+  .sort((a, b) => a.number - b.number)
 
-const findItemFromName = (name) => {
-  const item = items.value.find((item) => item.name === name)
+const index = files['../data/quests/00_Индекс_квестов.md']
+const tips = [...(index.match(/## Где обычно теряется время\s*([\s\S]*?)\n---/)?.[1] || '').matchAll(/^- (.+)$/gm)]
+  .map((match) => match[1].trim())
+const search = ref('')
+const selectedNumber = ref(1)
+const selectedQuest = computed(() => quests.find((quest) => quest.number === selectedNumber.value))
+const visibleQuests = computed(() => quests.filter((quest) =>
+  `${quest.title} ${quest.steps.join(' ')}`.toLocaleLowerCase('ru').includes(search.value.toLocaleLowerCase('ru').trim())
+))
 
-  return `/item/${item?.id}`
-}
-
-const vkItems = computed(() =>
-  items.value
-    .filter((item) => item.craft === 'Великая кузница')
-    .sort((a, b) => (a.level > b.level ? 1 : -1))
-)
-const angelItems = computed(() =>
-  items.value
-    .filter((item) => item.craft === 'Ангельская кузница')
-    .sort((a, b) => (a.level > b.level ? 1 : -1))
-)
-const demonItems = computed(() =>
-  items.value
-    .filter((item) => item.craft === 'Демоническая кузница')
-    .sort((a, b) => (a.level > b.level ? 1 : -1))
-)
-const demonRecipes = computed(() =>
-  items.value.filter((item) => item.source === 'Демон').sort((a, b) => (a.level > b.level ? 1 : -1))
-)
-
-const dragonItems = computed(() => items.value.filter((item) => item.source === 'Драконье логово'))
-
-const potions = computed(() =>
-  items.value.filter((item) => [578, 187, 186, 185, 562].includes(item.id))
-)
-
-const quests = computed(() => store.entities.quests)
-
-const modal = ref(null)
-const showMap = () => {
-  modal.value.open()
+function renderStep(text) {
+  return markdown.renderInline(text)
 }
 </script>
 
 <template>
-  <main class="px-2">
-    <div class="pt-2 text-3xl xxl:text-4xl">Квесты</div>
-    <div v-if="!quests?.length" class="mt-8">Куда-то потерялись :с</div>
-    <div class="flex w-full flex-col gap-4">
-      <div v-for="quest in quests" :key="quest.id" class="p-2 last:mb-20">
-        <span class="text-xl">{{ quest.name }}</span>
-        <div class="rounded-sm bg-silver p-4 px-4 text-lg text-primary opacity-75">
-          <div>
-            {{ quest.description }}
-          </div>
-        </div>
-        <div class="group mt-2" v-if="quest.help">
-          <button class="text-2xl text-orange">+</button>
-          <div class="grid grid-rows-[0fr] transition-all duration-300 group-hover:grid-rows-[1fr]">
-            <div class="overflow-hidden text-lg">
-              <div class="p-4">
-                <div v-if="quest.id === 3">
-                  Наконец нам пригодился медик, хотя нет, он по прежнему не нужен. Используем костры
-                  инженера, арты с регенерацией и
-                  <details>
-                    <summary class="text-orange">зелья восстановления здоровья</summary>
-                    <div class="flex flex-wrap gap-2">
-                      <router-link
-                        v-for="item in potions"
-                        :key="item.id"
-                        :to="`/item/${item.id}`"
-                        class="text-green"
-                      >
-                        {{ item.name }}
-                      </router-link>
-                    </div>
-                  </details>
-                </div>
-                <div v-else-if="quest.id === 4">
-                  Страж Кузни опасный противник для новичков, но если одолеете, то сможете крафтить
-                  в
-                  <span class="text-green">Великой кузнице</span>
-                  <details>
-                    <summary class="text-orange">кучу крутых шмоток</summary>
-                    <div class="flex flex-wrap gap-2">
-                      <router-link
-                        v-for="item in vkItems"
-                        :key="item.id"
-                        :to="`/item/${item.id}`"
-                        class="text-green"
-                      >
-                        {{ item.name }}
-                      </router-link>
-                    </div>
-                  </details>
-                </div>
-                <div v-else-if="quest.id === 5">
-                  Необходимо найти 3 таблички. Места возможного респауна на
-                  <button @click="showMap('blue')" class="text-green">карте</button>(устаревшая
-                  инфа)
-                </div>
+  <main class="quests-page">
+    <header class="page-head">
+      <h1>Квесты</h1>
+      <p>Последовательность из {{ quests.length }} заданий по реконструкции прохождения Goblin Survival.</p>
+    </header>
 
-                <div v-else-if="quest.id === 10">
-                  Собираем вот эту
-                  <router-link :to="findItemFromName('Набор деталей')" class="text-green">
-                    хреновину
-                  </router-link>
-                </div>
-                <div v-else-if="quest.id === 12">
-                  Будим афкашеров, делаем
-                  <router-link :to="findItemFromName('Серебряная пыль')" class="text-green">
-                    серебрянную пыль
-                  </router-link>
-                  , или берем арты для поиска 9 невидимых бочек. ТИК-ТАК МАЗАФАКА!
-                </div>
-                <div v-else-if="quest.id === 14">
-                  Этот чувак при выполнении квеста будет продавать книжки с картинками. А ещё у него
-                  можно скрафтить в
-                  <span class="text-yellow">Ангельской кузне</span>
-                  <details>
-                    <summary class="text-orange">вот это барахло</summary>
-                    <div class="flex flex-wrap gap-2">
-                      <router-link
-                        v-for="item in angelItems"
-                        :key="item.id"
-                        :to="`/item/${item.id}`"
-                        class="text-green"
-                      >
-                        {{ item.name }}
-                      </router-link>
-                    </div>
-                  </details>
-                </div>
-                <div v-else-if="quest.id === 15">
-                  Кому нужны книжки, завалите Ангела и сможете купить
-                  <details>
-                    <summary class="text-orange">крутые рецепты</summary>
-                    <div class="flex flex-wrap gap-2">
-                      <router-link
-                        v-for="item in demonRecipes"
-                        :key="item.id"
-                        :to="`/item/${item.id}`"
-                        class="text-green"
-                      >
-                        {{ item.name }}
-                      </router-link>
-                    </div>
-                  </details>
-                  и скрафтить в
-                  <span class="text-red">Демонической кузнице</span>
-                  <details>
-                    <summary class="text-orange">еще более крутые арты</summary>
-                    <div class="flex flex-wrap gap-2">
-                      <router-link
-                        v-for="item in demonItems"
-                        :key="item.id"
-                        :to="`/item/${item.id}`"
-                        class="text-green"
-                      >
-                        {{ item.name }}
-                      </router-link>
-                    </div>
-                  </details>
-                </div>
-                <div v-else-if="quest.id === 16">
-                  Инженер ещё живой? Пусть крафтит
-                  <router-link :to="findItemFromName('Голосовой модуль')" class="text-green">
-                    голосовой модуль
-                  </router-link>
-                </div>
-                <div v-else-if="quest.id === 19">
-                  Хм, вы убили одного слабенького дракона? Попробуйте убить сильного! А в награду
-                  получите доступ к
-                  <details>
-                    <summary class="text-orange">куче рецептов</summary>
-                    <div class="flex flex-wrap gap-2">
-                      <router-link
-                        v-for="item in dragonItems"
-                        :key="item.id"
-                        :to="`/item/${item.id}`"
-                        class="text-green"
-                      >
-                        {{ item.name }}
-                      </router-link>
-                    </div>
-                  </details>
-                  Внимание! Стоимость рецептов от полумиллиона гоблинских тугриков
-                </div>
-                <div v-else>{{ quest.help }}</div>
-              </div>
-            </div>
-          </div>
+    <div class="quest-layout">
+      <section class="panel quest-list" aria-label="Список квестов">
+        <label class="search-label" for="quest-search">Поиск по квестам</label>
+        <input id="quest-search" v-model="search" type="search" placeholder="Название или шаг прохождения" />
+        <p class="count">Найдено: {{ visibleQuests.length }} из {{ quests.length }}</p>
+        <div class="quest-links">
+          <button
+            v-for="quest in visibleQuests"
+            :key="quest.number"
+            type="button"
+            :class="{ active: selectedNumber === quest.number }"
+            @click="selectedNumber = quest.number"
+          >
+            <span class="quest-number">{{ String(quest.number).padStart(2, '0') }}</span>
+            <span>{{ quest.title }}</span>
+          </button>
+          <p v-if="!visibleQuests.length" class="empty">По этому запросу квесты не найдены.</p>
         </div>
-      </div>
+      </section>
+
+      <section v-if="selectedQuest" class="panel quest-detail">
+        <p class="eyebrow">Квест {{ selectedQuest.number }} из {{ quests.length }}</p>
+        <h2>{{ selectedQuest.title }}</h2>
+        <ol class="steps">
+          <li v-for="(step, index) in selectedQuest.steps" :key="index" v-html="renderStep(step)" />
+        </ol>
+        <div class="quest-nav">
+          <button type="button" :disabled="selectedNumber === 1" @click="selectedNumber--">← Предыдущий</button>
+          <button type="button" :disabled="selectedNumber === quests.length" @click="selectedNumber++">Следующий →</button>
+        </div>
+      </section>
     </div>
-    <TheModal ref="modal">
-      <template #default>
-        <BigMap class="absolute inset-0 z-10 flex w-fit flex-col gap-2 rounded-sm m-auto" />
-      </template>
-    </TheModal>
+
+    <section class="panel tips">
+      <h2>Где обычно теряется время</h2>
+      <ul><li v-for="(tip, index) in tips" :key="index" v-html="renderStep(tip)" /></ul>
+      <p class="source-note">Это структурированная реконструкция по сохранившейся индексации, не дословная копия. <a href="https://goblinworkshops.org/forum/viewtopic.php?f=8&t=76" target="_blank" rel="noopener noreferrer">Источник</a>.</p>
+    </section>
   </main>
 </template>
+
+<style scoped>
+.quests-page { color: #f6eee1; width: 100%; height: calc(100vh - 60px); overflow-y: auto; padding: 1rem 1.5rem 3rem; }
+.page-head h1 { color: #efc47d; font-size: 1.8rem; }
+.page-head p, .count, .source-note { color: #bfb7a9; }
+.quest-layout { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); gap: 1rem; margin-top: 1rem; align-items: start; }
+.panel { background: #171b20ed; border: 1px solid #725633; border-radius: 10px; padding: 1rem; }
+.quest-list { display: flex; flex-direction: column; max-height: min(720px, calc(100vh - 170px)); }
+.search-label, .eyebrow { color: #efc47d; }
+.quest-list input { width: 100%; margin: .45rem 0; padding: .55rem; color: #fff; background: #292e33; border: 1px solid #846943; border-radius: 5px; }
+.count { margin: .1rem 0 .55rem; font-size: .9rem; }
+.quest-links { overflow-y: auto; }
+.quest-links button { display: flex; width: 100%; gap: .65rem; align-items: center; text-align: left; padding: .55rem .45rem; border-bottom: 1px solid #3c3c3c; }
+.quest-links button:hover, .quest-links button.active { background: #463a2b; }
+.quest-number { color: #efc47d; font-variant-numeric: tabular-nums; }
+.empty { color: #bfb7a9; padding: .7rem .4rem; }
+.quest-detail { min-height: 380px; }
+.eyebrow { font-size: .9rem; }
+.quest-detail h2, .tips h2 { color: #efc47d; font-size: 1.3rem; margin: .3rem 0 1rem; }
+.steps { list-style: decimal; padding-left: 1.5rem; line-height: 1.55; }
+.steps li { margin-bottom: .75rem; padding-left: .25rem; }
+.steps li::marker { color: #efc47d; }
+.quest-nav { display: flex; justify-content: space-between; gap: .5rem; margin-top: 2rem; }
+.quest-nav button { border: 1px solid #846943; border-radius: 5px; color: #efc47d; padding: .35rem .65rem; }
+.quest-nav button:hover:not(:disabled) { background: #66502f; }
+.quest-nav button:disabled { opacity: .4; cursor: default; }
+.tips { margin-top: 1rem; }
+.tips ul { list-style: disc; padding-left: 1.4rem; line-height: 1.5; }
+.tips li { margin: .3rem 0; }
+.source-note { margin-top: 1rem; font-size: .9rem; }
+.source-note a { color: #efc47d; text-decoration: underline; }
+@media (max-width: 750px) { .quest-layout { grid-template-columns: 1fr; } .quest-list { max-height: 280px; } }
+</style>
