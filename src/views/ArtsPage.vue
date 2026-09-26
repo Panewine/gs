@@ -9,7 +9,6 @@ import { questArtifacts } from '@/data/quest-artifacts-1.5.5'
 
 const fromLevel = ref(1)
 const toLevel = ref(150)
-const rangeEnabled = ref(false)
 const selectedClass = ref('')
 const categories = reactive({})
 const categoryPicker = ref(null)
@@ -129,8 +128,9 @@ const artGroups = computed(() => {
   const from = Number(fromLevel.value)
   const to = Number(toLevel.value)
   const validRange = Number.isInteger(from) && Number.isInteger(to) && from >= 1 && to <= 150 && from <= to
+  const rangeActive = from !== 1 || to < 150
   const withinLimits = (item) => fitsClass(item, selectedClass.value) &&
-    (!rangeEnabled.value || (validRange && (item.level == null ? item.kind === 'food' || item.id.startsWith('pops-') || item.id.startsWith('bombs-') : item.level >= from && item.level <= to)))
+    (!rangeActive || (validRange && (item.level == null ? item.kind === 'food' || item.id.startsWith('pops-') || item.id.startsWith('bombs-') : item.level >= from && item.level <= to)))
   const filterGroup = (group, parentSelected = false) => {
     const selected = parentSelected || !!categories[group.id]
     const items = selected ? group.items.filter(withinLimits) : []
@@ -164,9 +164,8 @@ const arts = computed(() => {
       </label>
       <fieldset class="level-range">
         <legend>Диапазон уровней</legend>
-        <label><input v-model="rangeEnabled" type="checkbox" /> Ограничить</label>
-        <label>От <input v-model.number="fromLevel" type="number" min="1" max="150" aria-label="Уровень от" @input="rangeEnabled = true" /></label>
-        <label>До <input v-model.number="toLevel" type="number" min="1" max="150" aria-label="Уровень до" @input="rangeEnabled = true" /></label>
+        <label>От <input v-model.number="fromLevel" type="number" min="1" max="150" aria-label="Уровень от" /></label>
+        <label>До <input v-model.number="toLevel" type="number" min="1" max="150" aria-label="Уровень до" /></label>
       </fieldset>
       <div class="category-picker">
         <details ref="categoryPicker">
@@ -180,7 +179,7 @@ const arts = computed(() => {
           </div>
         </details>
       </div>
-      <p v-if="rangeEnabled && fromLevel > toLevel" class="range-error">Начальный уровень больше конечного.</p>
+      <p v-if="fromLevel > toLevel" class="range-error">Начальный уровень больше конечного.</p>
     </div>
     <CatalogBrowser :items="arts" :groups="artGroups" heading="Выбранные предметы" :show-class-filter="false" />
   </main>
@@ -196,7 +195,6 @@ legend { color: #efc47d; padding-right: .5rem; }
 label { display: flex; align-items: center; gap: .35rem; white-space: nowrap; }
 .class-choice select { min-width: 9rem; padding: .3rem .4rem; color: white; background: #292e33; border: 1px solid #846943; border-radius: 5px; }
 .level-range input { width: 5rem; padding: .3rem .4rem; color: white; background: #292e33; border: 1px solid #846943; border-radius: 5px; }
-.level-range input[type='checkbox'] { accent-color: #c69b52; width: 1rem; height: 1rem; }
 .category-picker { position: relative; align-self: end; }
 .category-trigger { display: flex; align-items: center; gap: .65rem; min-height: 2.2rem; padding: .35rem .7rem; border: 1px solid #846943; border-radius: 6px; background: #292e33; color: #efc47d; cursor: pointer; list-style: none; }
 .category-trigger::-webkit-details-marker { display: none; }
