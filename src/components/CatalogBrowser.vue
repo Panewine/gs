@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { bossFor, catalog, catalogKindLabel, catalogLabel, fallbackIcon, iconFor, itemById, normalizeName } from '@/common/catalog'
+import { bossFor, bossLevelFor, catalog, catalogKindLabel, catalogLabel, catalogLevelLabel, fallbackIcon, iconFor, itemById, normalizeName } from '@/common/catalog'
 import CatalogGroup from '@/components/CatalogGroup.vue'
 import CatalogRecipe from '@/components/CatalogRecipe.vue'
 import guides from '@/data/guides-1.5.5.json'
@@ -125,16 +125,16 @@ function changeClass() {
         <template v-else>
           <button v-for="item in filtered" :key="item.id" type="button" class="item-row" :class="{ active: item.id === selectedId }" @click="choose(item)">
             <img :src="iconFor(item)" :alt="item.name" loading="lazy" @error="$event.target.src = fallbackIcon" />
-            <span>{{ catalogLabel(item) }}<small>{{ item.level == null ? 'Уровень не указан' : `Уровень ${item.level}` }} · {{ catalogKindLabel(item) }}<b v-if="guideUsage[item.id]"> · в гайде</b></small></span>
+            <span>{{ catalogLabel(item) }}<small>{{ catalogLevelLabel(item) }} · {{ catalogKindLabel(item) }}<b v-if="guideUsage[item.id]"> · в гайде</b></small></span>
           </button>
         </template>
       </div>
     </div>
     <article class="details" v-if="selected">
-      <header><img :src="iconFor(selected)" :alt="selected.name" @error="$event.target.src = fallbackIcon" /><div><h2>{{ catalogLabel(selected) }}</h2><p>{{ selected.level == null ? 'Уровень не указан' : `Уровень ${selected.level}` }}</p></div></header>
+      <header><img :src="iconFor(selected)" :alt="selected.name" @error="$event.target.src = fallbackIcon" /><div><h2>{{ catalogLabel(selected) }}</h2><p>{{ catalogLevelLabel(selected) }}</p></div></header>
       <p v-if="selected.classes.length" class="muted">Класс: {{ selected.classes.join(', ') }}</p>
       <p v-else class="muted">Доступно всем классам</p>
-      <p v-if="bossFor(selected)" class="guide-note">Дроп с босса: {{ bossFor(selected) }}</p>
+      <p v-if="bossFor(selected)" class="guide-note">Дроп с босса: {{ bossFor(selected) }}<span v-if="bossLevelFor(selected)"> (ур. {{ bossLevelFor(selected) }})</span></p>
       <p v-if="guideUsage[selected.id]" class="guide-note">В сборках: {{ guideUsage[selected.id].join(', ') }}</p>
       <h3>Описание</h3><p class="raw">{{ selected.description || 'В CSV не указано.' }}</p>
       <h3>Рецепт и источник</h3><CatalogRecipe :key="selected.id" :item="selected" @select="choose" />
@@ -149,7 +149,7 @@ function changeClass() {
     <Teleport to="body">
       <div v-if="hoveredUsed" id="used-preview" class="used-preview" role="tooltip" :style="previewStyle" @mouseenter="keepUsedPreview" @mouseleave="hideUsedPreview">
         <strong>{{ catalogLabel(hoveredUsed) }}</strong>
-        <span class="preview-level">{{ hoveredUsed.level == null ? 'Уровень не указан' : `Уровень ${hoveredUsed.level}` }}</span>
+        <span class="preview-level">{{ catalogLevelLabel(hoveredUsed) }}</span>
         <p>{{ hoveredUsed.description || 'Описание не указано.' }}</p>
       </div>
     </Teleport>

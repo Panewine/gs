@@ -15,6 +15,25 @@ const drops = {
   'Смерть': ['item-441', 'item-442', 'item-443', 'item-444', 'item-445', 'item-465', 'item-466', 'item-467', 'item-468', 'item-469', 'item-470'],
 }
 
+// Boss encounter levels supplied by the user. Item equipment levels in the CSV
+// can be different and take precedence when filtering items.
+export const bossLevelByName = {
+  'Гигантский арахнид': 5,
+  'Потный рабовладелец': 10,
+  'Страж врат': 15,
+  'Экскаватор КУС': 20,
+  'Похоть': 25,
+  'Бомбс и Аккуратерс': 30,
+  'Алчность': 35,
+  'Хазул': 39,
+  'Страх': 45,
+  'Дрессировщик': 50,
+  'Зависть': 55,
+  'Шиззл': 60,
+  'Смерть': 65,
+  'Смерть и мини-боссы волн 61–64': 61,
+}
+
 export const bossByItemId = Object.fromEntries(
   Object.entries(drops).flatMap(([boss, ids]) => ids.map((id) => [id, boss]))
 )

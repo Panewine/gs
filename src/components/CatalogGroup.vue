@@ -1,5 +1,5 @@
 <script setup>
-import { catalogKindLabel, catalogLabel, fallbackIcon, iconFor } from '@/common/catalog'
+import { catalogKindLabel, catalogLabel, catalogLevelLabel, fallbackIcon, iconFor } from '@/common/catalog'
 
 defineOptions({ name: 'CatalogGroup' })
 defineProps({
@@ -16,7 +16,7 @@ const emit = defineEmits(['select'])
     <CatalogGroup v-for="child in group.children" :key="child.title" :group="child" :selected-id="selectedId" :guide-usage="guideUsage" @select="emit('select', $event)" />
     <button v-for="item in group.items" :key="item.id" type="button" class="item-row" :class="{ active: item.id === selectedId }" @click="emit('select', item)">
       <img :src="iconFor(item)" :alt="item.name" loading="lazy" @error="$event.target.src = fallbackIcon" />
-      <span>{{ catalogLabel(item) }}<small>{{ item.level == null ? 'Уровень не указан' : `Уровень ${item.level}` }} · {{ catalogKindLabel(item) }}<b v-if="guideUsage[item.id]"> · в гайде</b></small></span>
+      <span>{{ catalogLabel(item) }}<small>{{ catalogLevelLabel(item) }} · {{ catalogKindLabel(item) }}<b v-if="guideUsage[item.id]"> · в гайде</b></small></span>
     </button>
   </details>
 </template>

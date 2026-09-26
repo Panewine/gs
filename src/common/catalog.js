@@ -1,5 +1,5 @@
 import bombsDrops from '@/data/bombs-drops-legacy'
-import { bossByItemId } from '@/data/boss-drops-1.5.5'
+import { bossByItemId, bossLevelByName } from '@/data/boss-drops-1.5.5'
 import items from '@/data/items-1.5.5.json'
 import popsPotions from '@/data/pops-potions-legacy'
 
@@ -9,6 +9,19 @@ export const fallbackIcon = `${import.meta.env.BASE_URL}images/question-wc3.png`
 
 export function bossFor(item) {
   return bossByItemId[item?.id] || ''
+}
+
+export function bossLevelFor(item) {
+  return bossLevelByName[bossFor(item)] ?? null
+}
+
+export function catalogLevelLabel(item) {
+  if (item.level != null) return `Уровень ${item.level}`
+  const bossLevel = bossLevelFor(item)
+
+  if (bossLevel == null) return 'Уровень не указан'
+
+  return `Уровень предмета не указан · ${bossFor(item).includes('мини-боссы') ? 'источник от' : 'босс'} ур. ${bossLevel}`
 }
 
 export function normalizeName(value) {

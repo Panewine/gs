@@ -1,7 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 
-import { bossFor, catalog, fitsClass, itemById } from '@/common/catalog'
+import { bossFor, bossLevelFor, catalog, fitsClass, itemById } from '@/common/catalog'
 import CatalogBrowser from '@/components/CatalogBrowser.vue'
 import CategoryToggle from '@/components/CategoryToggle.vue'
 import guides from '@/data/guides-1.5.5.json'
@@ -129,8 +129,12 @@ const artGroups = computed(() => {
   const to = Number(toLevel.value)
   const validRange = Number.isInteger(from) && Number.isInteger(to) && from >= 1 && to <= 150 && from <= to
   const rangeActive = from !== 1 || to < 150
-  const withinLimits = (item) => fitsClass(item, selectedClass.value) &&
-    (!rangeActive || (validRange && (item.level == null ? item.kind === 'food' || item.id.startsWith('pops-') || !!bossFor(item) : item.level >= from && item.level <= to)))
+  const withinLimits = (item) => {
+    const level = item.level ?? bossLevelFor(item)
+
+    return fitsClass(item, selectedClass.value) &&
+      (!rangeActive || (validRange && (level == null ? item.kind === 'food' || item.id.startsWith('pops-') : level >= from && level <= to)))
+  }
   const filterGroup = (group, parentSelected = false) => {
     const selected = parentSelected || !!categories[group.id]
     const items = selected ? group.items.filter(withinLimits) : []
@@ -153,7 +157,7 @@ const arts = computed(() => {
   <main class="arts-page">
     <header>
       <h1>Арты</h1>
-      <p>Выберите категории предметов. Класс и диапазон уровней ограничивают выбранное. Еда, зелья Попса и детали боссов без указанного уровня доступны при любом диапазоне.</p>
+      <p>Выберите категории предметов. Диапазон учитывает уровень предмета, а если он не указан — уровень босса. Еда и зелья Попса доступны при любом диапазоне.</p>
     </header>
     <div class="arts-filters">
       <label class="class-choice">Класс
