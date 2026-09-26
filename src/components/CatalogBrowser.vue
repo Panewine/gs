@@ -106,7 +106,7 @@ function changeClass() {
       <p v-if="bossFor(selected)" class="guide-note">Дроп с босса: {{ bossFor(selected) }}</p>
       <p v-if="guideUsage[selected.id]" class="guide-note">В сборках: {{ guideUsage[selected.id].join(', ') }}</p>
       <h3>Описание</h3><p class="raw">{{ selected.description || 'В CSV не указано.' }}</p>
-      <h3>Рецепт и источник</h3><CatalogRecipe :item="selected" @select="choose" />
+      <h3>Рецепт и источник</h3><CatalogRecipe :key="selected.id" :item="selected" @select="choose" />
       <h3 v-if="usedIn.length">Используется в</h3>
       <div class="used"><button v-for="item in usedIn" :key="item.id" @click="choose(item)">{{ item.name }}</button></div>
     </article>
