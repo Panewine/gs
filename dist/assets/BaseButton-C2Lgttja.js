@@ -1,1 +1,0 @@
-import{v as r,x as t,E as o,C as a}from"./@vue-CnxQuBsi.js";const c={__name:"BaseButton",props:{text:String,border:String},setup(e){return(s,n)=>(t(),r("button",{class:a(["mr-auto rounded-2xl border border-solid px-2 py-4 ease-out hover:border-red hover:text-red",`border-${e.border?e.border:"second"}`])},o(e.text),3))}};export{c as _};
