@@ -1,4 +1,4 @@
-import{x as l,y as t,G as p,D as o,u,Q as y,R as w,L as x,O as C,E as g,a as h,e as q,v as i,B as L}from"./@vue-BYqsT_3C.js";import{M}from"./markdown-it-CbRaHgGS.js";import{_ as N}from"./index-DxT9D2kp.js";import"./mdurl-k9Sl0PQj.js";import"./uc.micro-kMc2yuuw.js";import"./linkify-it-swVJLcMX.js";import"./punycode.js-DaOgEp9O.js";import"./yandex-metrika-vue3-BLhOeDw4.js";import"./@vueuse-BBTn1n1f.js";import"./vue-router-BodTTIF-.js";import"./firebase-B5XFRHZz.js";import"./@firebase-NSykY1O6.js";import"./idb-BXWtuYvb.js";const Q=`# Квест 1: Остатки снаряжения
+import{x as l,y as t,G as p,D as o,u,Q as y,R as w,L as x,O as C,E as g,a as h,e as q,v as i,B as L}from"./@vue-BYqsT_3C.js";import{M}from"./markdown-it-CbRaHgGS.js";import{_ as N}from"./index--yIsVC9B.js";import"./mdurl-k9Sl0PQj.js";import"./uc.micro-kMc2yuuw.js";import"./linkify-it-swVJLcMX.js";import"./punycode.js-DaOgEp9O.js";import"./yandex-metrika-vue3-BLhOeDw4.js";import"./@vueuse-BBTn1n1f.js";import"./vue-router-BodTTIF-.js";import"./firebase-B5XFRHZz.js";import"./@firebase-NSykY1O6.js";import"./idb-BXWtuYvb.js";const Q=`# Квест 1: Остатки снаряжения
 
 ### Цель
 
