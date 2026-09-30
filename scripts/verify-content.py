@@ -27,6 +27,9 @@ final_set = next(item for item in items if item["name"] == "Сет Истинн�
 assert sum(ingredient["itemId"] is not None for ingredient in final_set["ingredients"]) == 6
 assert any("Великой кузнице" in ingredient["text"] and ingredient["itemId"] is None for ingredient in final_set["ingredients"])
 assert len(guides["classes"]) == 8 and len(guides["variants"]) == 14
+for soul, hunter in (("Драконья Душа", "item-283"), ("Драконья Душа-2", "item-284")):
+    recipe = next(item for item in items if item["name"] == soul)
+    assert next(ingredient for ingredient in recipe["ingredients"] if ingredient["text"] == "Охотник")["itemId"] == hunter
 assert all(len(stage["items"]) == 6 and stage["sourceLevel"] <= stage["level"] for variant in guides["variants"] for stage in variant["stages"])
 assert all(pick["itemId"] is None or pick["itemId"] in known_ids for variant in guides["variants"] for stage in variant["stages"] for pick in stage["items"])
 items_by_id = {item["id"]: item for item in items}

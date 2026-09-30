@@ -120,6 +120,11 @@ def build_items():
             elif ingredient_key == key("Порваная сеть дрессировщика"):
                 ingredient_key = key("Порванная сеть")
             ids = lookup.get(ingredient_key, [])
+            if ingredient_key == key("Охотник"):
+                if item["name"] == "Драконья Душа":
+                    ids = ["item-283"]
+                elif item["name"] == "Драконья Душа-2":
+                    ids = ["item-284"]
             ingredients.append({"text": label, "count": count, "itemId": ids[0] if len(ids) == 1 and ids[0] != item["id"] else None})
         item["ingredients"] = ingredients
     return items
