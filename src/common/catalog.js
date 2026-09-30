@@ -61,3 +61,11 @@ export function iconFor(item) {
 export function catalogKindLabel(item) {
   return item.kind === 'food' || /энергетик/i.test(item.name) ? 'Еда' : 'Предмет'
 }
+
+export function catalogRowMeta(item, inGuide = false) {
+  return [
+    catalogLevelLabel(item),
+    catalogKindLabel(item) === 'Еда' ? 'Еда' : '',
+    inGuide ? 'в гайде' : '',
+  ].filter(Boolean).join(' ')
+}

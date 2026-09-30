@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { bossFor, bossLevelFor, catalog, catalogKindLabel, catalogLabel, catalogLevelLabel, fallbackIcon, iconFor, itemById, normalizeName } from '@/common/catalog'
+import { bossFor, bossLevelFor, catalog, catalogLabel, catalogLevelLabel, catalogRowMeta, fallbackIcon, iconFor, itemById, normalizeName } from '@/common/catalog'
 import CatalogGroup from '@/components/CatalogGroup.vue'
 import CatalogRecipe from '@/components/CatalogRecipe.vue'
 import guides from '@/data/guides-1.5.5.json'
@@ -125,7 +125,7 @@ function changeClass() {
         <template v-else>
           <button v-for="item in filtered" :key="item.id" type="button" class="item-row" :class="{ active: item.id === selectedId }" @click="choose(item)">
             <img :src="iconFor(item)" :alt="item.name" loading="lazy" @error="$event.target.src = fallbackIcon" />
-            <span>{{ catalogLabel(item) }}<small>{{ catalogLevelLabel(item) }}<span v-if="item.level != null"> · </span>{{ catalogKindLabel(item) }}<b v-if="guideUsage[item.id]"> · в гайде</b></small></span>
+            <span>{{ catalogLabel(item) }}<small v-if="catalogRowMeta(item, !!guideUsage[item.id])">{{ catalogRowMeta(item, !!guideUsage[item.id]) }}</small></span>
           </button>
         </template>
       </div>
@@ -171,9 +171,9 @@ input { flex: 1; }
 .item-row { display: flex; width: 100%; align-items: center; text-align: left; gap: .6rem; padding: .35rem; border-bottom: 1px solid #353b42; }
 .item-row:hover, .item-row.active { background: #3f3527; }
 .item-row img { width: 44px; height: 44px; }
-.item-row span { display: flex; flex-direction: column; }
-.item-row small { font-size: .75rem; }
-.item-row b, .guide-note { color: #d2ad6c; }
+.item-row span { display: flex; flex-direction: column; min-width: 0; }
+.item-row small { font-size: .75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.guide-note { color: #d2ad6c; }
 .details header { display: flex; align-items: center; gap: 1rem; }
 .details header img { width: 64px; height: 64px; }
 .details header h2 { margin: 0; }
