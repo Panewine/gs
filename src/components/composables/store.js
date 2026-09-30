@@ -26,7 +26,7 @@ export const store = reactive({
     if (!this.entities[entity].length) {
       const entitiesRef = ref(db, entity)
       onValue(entitiesRef, async (snapshot) => {
-        this.entities[entity] = await snapshot.val()
+        this.entities[entity] = snapshot.val() || []
         this.entities[entity].forEach((item) => {
           if (item.src) {
             item.src = `${baseIconPath}${item.src.replace('/uploads/', '')}`

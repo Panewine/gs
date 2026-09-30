@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "gs" / "src" / "data"
-CSV = ROOT / "GS1.5.5 - Крафт всего.csv"
+CSV = ROOT / "gs" / "source" / "catalog-1.5.5.csv"
 GUIDES = ROOT / "Персонажи"
 ICON_URL = "https://raw.githubusercontent.com/AlAstroMoody/gs-icons-full/main/"
 STAGES = (10, 25, 30, 50, 75, 100, 150)
@@ -55,6 +55,11 @@ def build_items():
     with CSV.open(encoding="utf-8-sig", newline="") as source:
         rows = list(csv.reader(source))
     icons = get_legacy_icons()
+    existing = json.loads((OUTPUT / "items-1.5.5.json").read_text(encoding="utf-8"))
+    existing_ids = defaultdict(list)
+    for record in existing:
+        existing_ids[(record["kind"], key(record["name"]))].append(record["id"])
+    next_ids = {kind: max(int(record["id"].split("-")[1]) for record in existing if record["kind"] == kind) + 1 for kind in ("item", "food")}
     items = []
     for row_number, row in enumerate(rows[3:], start=4):
         for offset, kind in ((0, "item"), (5, "food")):
@@ -77,8 +82,14 @@ def build_items():
                     for candidate in ("Сталкер", "Инженер", "Пулемётчик", "Медик", "Подрывник", "Ракетчик", "Пироманьяк", "Снайпер"):
                         if key(candidate)[:5] in key(restriction.group(1)):
                             classes.append(candidate)
+            previous = existing_ids[(kind, key(name))]
+            if previous:
+                item_id = previous.pop(0)
+            else:
+                item_id = f"{kind}-{next_ids[kind]}"
+                next_ids[kind] += 1
             items.append({
-                "id": f"{kind}-{row_number}",
+                "id": item_id,
                 "name": name,
                 "level": level,
                 "classes": classes,

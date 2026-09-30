@@ -3,10 +3,11 @@ import { computed, ref, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 
 import BaseAccordeon from '@/components/BaseAccordeon.vue'
-import BaseItemImage from '@/components/BaseItemImage.vue'
 import BaseLink from '@/components/BaseLink.vue'
 import BaseMarkdownWrapper from '@/components/BaseMarkdownWrapper.vue'
 import { store } from '@/components/composables/store.js'
+import { bossFor, catalog, iconFor } from '@/common/catalog.js'
+import { fallbackBosses } from '@/data/bosses-fallback.js'
 import {
   SpiderIcon,
   SlaveOwnerIcon,
@@ -34,8 +35,15 @@ const isContentVisible = ref(true)
 const showSidebar = ref(false)
 const animationsLoaded = ref(false)
 
-const bosses = computed(() => store.entities.bosses)
-const items = computed(() => store.entities.items)
+const bosses = computed(() => {
+  const remote = store.entities.bosses || []
+  const knownNames = new Set(fallbackBosses.map((boss) => boss.name))
+
+  return [
+    ...fallbackBosses.map((boss) => remote.find((entry) => entry.name === boss.name) || boss),
+    ...remote.filter((boss) => !knownNames.has(boss.name)),
+  ]
+})
 
 const currentBoss = computed(
   () => bosses.value.find((boss) => boss.name === route.query.name) || bosses.value[0]
@@ -66,7 +74,8 @@ const bossIcons = {
 const noseSlotBosses = new Set(['Потный рабовладелец', 'Экскаватор КУС', 'Бомбс и Аккуратерс', 'Хазул', 'Дрессировщик'])
 
 const currentBossItems = computed(() => {
-  return items.value.filter((item) => currentBoss.value.items.some((i) => i.name === item.name))
+  if (!currentBoss.value) return []
+  return catalog.filter((item) => bossFor(item) === currentBoss.value.name)
 })
 
 // Проверка наличия контента для босса
@@ -187,12 +196,21 @@ onMounted(() => {
               :class="{ 'fade-in-opacity': animationsLoaded }"
             >
               <h1 class="text-2xl lg:text-3xl font-bold text-white mb-2">{{ currentBoss.name }}</h1>
+              <p v-if="currentBoss.recovered" class="text-sm text-gray-400 mb-3">
+                Босс волны {{ currentBoss.wave }}. Описание восстановлено по старому гайду и не подтверждено для версии 1.5.5.
+              </p>
               <p
                 v-if="currentBoss.catchPhrase"
                 class="text-base lg:text-lg text-gray-300 italic mb-4"
               >
                 "{{ currentBoss.catchPhrase }}"
               </p>
+            </div>
+
+            <div v-if="currentBoss.recovered" class="px-2 mb-5 text-gray-300 space-y-2">
+              <p v-if="currentBoss.summons"><strong>Призыв:</strong> {{ currentBoss.summons }}</p>
+              <p v-if="currentBoss.danger"><strong>Чем опасен:</strong> {{ currentBoss.danger }}</p>
+              <p v-if="currentBoss.stats"><strong>Параметры:</strong> {{ currentBoss.stats }}</p>
             </div>
 
             <div
@@ -261,12 +279,12 @@ onMounted(() => {
             </div>
             <div class="grid grid-cols-1 gap-2">
               <router-link
-                :to="`/craft/?name=${item.name}`"
+                :to="`/arts?item=${item.id}`"
                 class="flex items-center rounded-lg border-2 border-gray-500 bg-gray-700 hover:border-yellow-400 hover:shadow-[0_0_12px_gold] hover:bg-gray-600 transition-all duration-200 p-2"
                 v-for="item in currentBossItems"
                 :key="item.id"
               >
-                <BaseItemImage :url="item.src" class="mr-3" />
+                <img :src="iconFor(item)" :alt="item.name" class="mr-3 w-12 h-12 object-contain" />
                 <span class="text-link text-sm lg:text-base">{{ item.name }}</span>
               </router-link>
             </div>

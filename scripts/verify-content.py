@@ -6,15 +6,16 @@ from pathlib import Path
 root = Path(__file__).resolve().parents[2]
 items = json.loads((root / "gs/src/data/items-1.5.5.json").read_text(encoding="utf-8"))
 guides = json.loads((root / "gs/src/data/guides-1.5.5.json").read_text(encoding="utf-8"))
-with (root / "GS1.5.5 - Крафт всего.csv").open(encoding="utf-8-sig", newline="") as source:
+with (root / "gs/source/catalog-1.5.5.csv").open(encoding="utf-8-sig", newline="") as source:
     rows = list(csv.reader(source))[3:]
 
 expected = []
 for number, row in enumerate(rows, 4):
     for offset, kind in ((0, "item"), (5, "food")):
         if row[offset].strip() and (row[offset + (3 if offset == 0 else 1)].strip() or row[offset + (4 if offset == 0 else 2)].strip()):
-            expected.append((f"{kind}-{number}", row[offset].strip()))
-assert Counter(expected) == Counter((item["id"], item["name"]) for item in items)
+            expected.append((kind, row[offset].strip()))
+assert Counter(expected) == Counter((item["kind"], item["name"]) for item in items)
+assert len({item["id"] for item in items}) == len(items)
 boss_drop_ids = {f"bombs-I04{letter}" for letter in "KLMNO"}
 known_ids = {item["id"] for item in items} | boss_drop_ids
 assert all(ingredient["itemId"] is None or ingredient["itemId"] in known_ids for item in items for ingredient in item["ingredients"])

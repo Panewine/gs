@@ -125,13 +125,13 @@ function changeClass() {
         <template v-else>
           <button v-for="item in filtered" :key="item.id" type="button" class="item-row" :class="{ active: item.id === selectedId }" @click="choose(item)">
             <img :src="iconFor(item)" :alt="item.name" loading="lazy" @error="$event.target.src = fallbackIcon" />
-            <span>{{ catalogLabel(item) }}<small>{{ catalogLevelLabel(item) }} · {{ catalogKindLabel(item) }}<b v-if="guideUsage[item.id]"> · в гайде</b></small></span>
+            <span>{{ catalogLabel(item) }}<small>{{ catalogLevelLabel(item) }}<span v-if="item.level != null"> · </span>{{ catalogKindLabel(item) }}<b v-if="guideUsage[item.id]"> · в гайде</b></small></span>
           </button>
         </template>
       </div>
     </div>
     <article class="details" v-if="selected">
-      <header><img :src="iconFor(selected)" :alt="selected.name" @error="$event.target.src = fallbackIcon" /><div><h2>{{ catalogLabel(selected) }}</h2><p>{{ catalogLevelLabel(selected) }}</p></div></header>
+      <header><img :src="iconFor(selected)" :alt="selected.name" @error="$event.target.src = fallbackIcon" /><div><h2>{{ catalogLabel(selected) }}</h2><p v-if="selected.level != null">{{ catalogLevelLabel(selected) }}</p></div></header>
       <p v-if="selected.classes.length" class="muted">Класс: {{ selected.classes.join(', ') }}</p>
       <p v-else class="muted">Доступно всем классам</p>
       <p v-if="bossFor(selected)" class="guide-note">Дроп с босса: {{ bossFor(selected) }}<span v-if="bossLevelFor(selected)"> (ур. {{ bossLevelFor(selected) }})</span></p>
@@ -149,7 +149,7 @@ function changeClass() {
     <Teleport to="body">
       <div v-if="hoveredUsed" id="used-preview" class="used-preview" role="tooltip" :style="previewStyle" @mouseenter="keepUsedPreview" @mouseleave="hideUsedPreview">
         <strong>{{ catalogLabel(hoveredUsed) }}</strong>
-        <span class="preview-level">{{ catalogLevelLabel(hoveredUsed) }}</span>
+        <span v-if="hoveredUsed.level != null" class="preview-level">{{ catalogLevelLabel(hoveredUsed) }}</span>
         <p>{{ hoveredUsed.description || 'Описание не указано.' }}</p>
       </div>
     </Teleport>

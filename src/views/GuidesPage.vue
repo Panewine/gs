@@ -140,7 +140,7 @@ async function showCraft(itemId) {
         <p class="muted">Требование уровня, характеристики и рецепт взяты из CSV 1.5.5. Нажмите «Рецепт», чтобы открыть полное дерево крафта в нижнем правом окне.</p>
         <div class="quest-list">
           <article v-for="item in classQuestArtifacts" :key="item.id" class="quest-item">
-            <div class="quest-heading"><strong>{{ catalogLabel(item) }}</strong><span>Уровень {{ item.level }}</span><button type="button" class="craft-toggle" @click="showCraft(item.id)">{{ selectedCraftId === item.id ? 'Скрыть рецепт' : 'Рецепт' }}</button></div>
+            <div class="quest-heading"><strong>{{ catalogLabel(item) }}</strong><span v-if="item.level != null">Уровень {{ item.level }}</span><button type="button" class="craft-toggle" @click="showCraft(item.id)">{{ selectedCraftId === item.id ? 'Скрыть рецепт' : 'Рецепт' }}</button></div>
             <details><summary>Характеристики и эффект</summary><p>{{ item.description }}</p></details>
           </article>
         </div>

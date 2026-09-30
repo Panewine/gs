@@ -16,12 +16,7 @@ export function bossLevelFor(item) {
 }
 
 export function catalogLevelLabel(item) {
-  if (item.level != null) return `Уровень ${item.level}`
-  const bossLevel = bossLevelFor(item)
-
-  if (bossLevel == null) return 'Уровень не указан'
-
-  return `Уровень предмета не указан · ${bossFor(item).includes('мини-боссы') ? 'источник от' : 'босс'} ур. ${bossLevel}`
+  return item.level == null ? '' : `Уровень ${item.level}`
 }
 
 export function normalizeName(value) {

@@ -31,8 +31,8 @@ const stoneName = /^(?:Алмаз|Аметист|Изумруд|Рубин|Са�
 const energyName = /энергетик/i
 // The old catalog places this item in the Great Forge; the CSV omits its forge.
 const greatForgeWithoutRecipeNote = new Set(['item-386'])
-// The CSV and old catalog do not specify a forge for these late recipes.
-const unknownForge = new Set(['item-458', 'item-459', 'item-462'])
+// The CSV does not specify a forge for this recipe.
+const unknownForge = new Set(['item-462'])
 
 function hasBossOrigin(item, visited = new Set()) {
   if (!item || visited.has(item.id)) return false
@@ -58,13 +58,13 @@ const sourceGroups = (() => {
     id: 'forge', title: 'Кузница', items: [], children: [
       { id: 'ores', title: 'Руды', items: [], children: oreNames.map(([title]) => ({ id: title.toLowerCase(), title, items: [] })) },
       { id: 'stones', title: 'Камни', items: [] },
-      { id: 'dragonForge', title: 'Драконья кузница', items: [] },
       { id: 'otherCraft', title: 'Другой крафт', items: [] },
     ],
   }
   const greatForgeGroup = { id: 'greatForge', title: 'Великая кузница (ВК)', items: [] }
   const angelForgeGroup = { id: 'angelForge', title: 'Ангельская кузница (АК)', items: [] }
   const demonForgeGroup = { id: 'demonForge', title: 'Демоническая кузница (ДК)', items: [] }
+  const dragonForgeGroup = { id: 'dragonForge', title: 'Драконья кузница (Драк)', items: [] }
   const enemyDrops = { id: 'enemyDrops', title: 'Дроп с врагов', items: [] }
   const shop = { id: 'shop', title: 'Магазин', items: [] }
   const jewels = { id: 'jewels', title: 'Драгоценности', items: [] }
@@ -85,6 +85,7 @@ const sourceGroups = (() => {
     greatForgeGroup,
     angelForgeGroup,
     demonForgeGroup,
+    dragonForgeGroup,
     enemyDrops,
     food,
     pops,
@@ -93,6 +94,7 @@ const sourceGroups = (() => {
   for (const item of catalog) {
     if (item.id.startsWith('pops-')) pops.items.push(item)
     else if (item.kind === 'food' || energyName.test(item.name)) food.items.push(item)
+    else if (dragonForge.test(item.recipe)) dragonForgeGroup.items.push(item)
     else if (questIds.has(item.id)) quests.items.push(item)
     else if (setName.test(item.name)) sets.items.push(item)
     else if (bossFor(item)) bossDrops.items.push(item)
@@ -103,13 +105,12 @@ const sourceGroups = (() => {
     else if (greatForge.test(item.recipe) || greatForgeWithoutRecipeNote.has(item.id)) greatForgeGroup.items.push(item)
     else if (angelForge.test(item.recipe)) angelForgeGroup.items.push(item)
     else if (demonForge.test(item.recipe)) demonForgeGroup.items.push(item)
-    else if (dragonForge.test(item.recipe)) forge.children[2].items.push(item)
     else {
       const oreIndex = oreNames.findIndex(([, pattern]) => item.ingredients.some((ingredient) => pattern.test(ingredient.text)))
 
       if (oreIndex >= 0) forge.children[0].children[oreIndex].items.push(item)
       else if (item.ingredients.some((ingredient) => stoneName.test(ingredient.text))) forge.children[1].items.push(item)
-      else forge.children[3].items.push(item)
+      else forge.children[2].items.push(item)
     }
   }
 
